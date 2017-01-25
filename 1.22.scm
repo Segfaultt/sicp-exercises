@@ -1,34 +1,35 @@
+(define (search-for-primes lower-limit limit)
+  (define (iter cur)
+    (if (<= cur limit) (timed-prime-test cur))
+    (if (<= cur limit) (iter (+ cur 2))
+      "done!"))
+  (if (even? lower-limit)
+    (iter (+ lower-limit 1))
+    (iter lower-limit)))
+
 (define (timed-prime-test n)
-  (newline)
-  (display n)
   (start-prime-test n (runtime)))
 
 (define (start-prime-test n start-time)
-  (if (fast-prime? n 5)
-    (report-prime (- (runtime) start-time))))
+  (if (prime? n)
+    (begin (newline)
+    (display n)
+    (report-prime (- (runtime) start-time)))))
+
+(define (prime? n)
+  (= n (smallest-devisor n)))
+
+(define (smallest-devisor n)
+  (smallest-devisor-iter 2 n))
+
+(define (square x)
+  (* x x))
+
+(define (smallest-devisor-iter test-devisor n)
+  (cond ((>= (square test-devisor) n)	n)
+	((= (remainder n test-devisor) 0) test-devisor)
+	(else (smallest-devisor-iter (+ test-devisor 1) n))))
 
 (define (report-prime elapsed-time)
   (display " *** ")
   (display elapsed-time))
-
-(define (fast-prime? n times)
-  (cond ((= times 0) true)
-	((fermat-test n) (fast-prime? n (- times 1)))
-	(else false)))
-
-(define (fermat-test n)
-  (define (try-it a)
-    (= (expmod a n n) a))
-  (try-it (+ 1 (random (- n 1)))))
-
-(define (expmod base e m)
-  (cond ((= e 0) 1)
-	((even? e)
-	 (remainder (square (expmod base(/ e 2) m))
-		    m))
-	(else
-	  (remainder (* base (expmod base (- e 1) m))
-		     m))))
-
-(define (square x)
-  (* x x))
